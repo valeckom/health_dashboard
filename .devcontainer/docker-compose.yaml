@@ -3,7 +3,7 @@ services:
     # Need this to mount the Android device to the container
     privileged: true
 
-    #network_mode: "host"
+    network_mode: "host"
 
     build:
       context: .
