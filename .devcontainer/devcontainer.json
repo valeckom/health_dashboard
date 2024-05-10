@@ -1,0 +1,15 @@
+{
+  name: "health-dashboard",
+
+  dockerComposeFile: "docker-compose.yaml",
+
+  service: "workspace",
+
+  postStartCommand: "adb -a server",
+
+  hostRequirements: {
+    cpus: 4,
+    memory: "8gb",
+    storage: "11gb"
+  }
+}

@@ -1,0 +1,28 @@
+services:
+  workspace:
+    # Need this to mount the android device to the container
+    privileged: true
+
+    network_mode: "host"
+
+    build:
+      context: .
+
+      ssh:
+        - default
+
+      # Build stack that matches ionic Appflow
+      # https://ionic.io/docs/appflow/build-stacks
+      args:
+        DEBIAN_VERSION: 11.6
+        FLUTTER_VERSION: 3.19.6
+        JAVA_VERSION: 17  # Must be an integer
+        ANDROID_SDK: 34  # Must be an integer
+        ANDROID_BUILD_TOOLS_VERSION: 34.0.0
+        ANDROID_COMMANDLINE_TOOLS: 10406996
+
+    volumes:
+      - home:/root
+
+volumes:
+  home:
