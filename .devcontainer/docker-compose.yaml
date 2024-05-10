@@ -1,9 +1,9 @@
 services:
   workspace:
-    # Need this to mount the android device to the container
+    # Need this to mount the Android device to the container
     privileged: true
 
-    network_mode: "host"
+    #network_mode: "host"
 
     build:
       context: .
