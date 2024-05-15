@@ -22,7 +22,10 @@ services:
         ANDROID_COMMANDLINE_TOOLS: 10406996
 
     volumes:
-      - home:/root
+      - ./:/root/health_dashboard
+      - jetbrains:/root/.cache/JetBrains
+      - vscode:/root/.vscode-server
 
 volumes:
-  home:
+  jetbrains:
+  vscode:

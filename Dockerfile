@@ -16,7 +16,18 @@ RUN apt-get install -qq \
     unzip \
     wget
 
+# GIT
+RUN apt-get install -qq git && \
+    # FIX: Git command returns fatal error: "detected dubious ownership"
+    git config --system --add safe.directory '*';
+
+# SSH
+RUN apt-get install -qq openssh-server && \
+    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
+    echo "root:0000" | chpasswd
+
 # JAVA
+# depedency of Android SDK
 RUN apt-get -qq install openjdk-${JAVA_VERSION}-jdk-headless && \
     java -version
 
@@ -47,15 +58,10 @@ RUN mkdir android && cd android && \
 RUN mkdir /root/.android && touch /root/.android/repositories.cfg && \
     while true; do echo 'y'; sleep 2; done | sdkmanager "platform-tools" "build-tools;$ANDROID_BUILD_TOOLS_VERSION" && \
     while true; do echo 'y'; sleep 2; done | sdkmanager "platforms;android-$ANDROID_SDK"
-
+    
 RUN chmod a+x -R $ANDROID_SDK_ROOT && \
     chown -R root:root $ANDROID_SDK_ROOT && \
     rm -rf /opt/android/licenses
-
-# SSH
-RUN apt-get install -qq openssh-server && \
-    sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
-    echo "root:0000" | chpasswd
 
 # Flutter
 ENV FLUTTER_HOME="/usr/bin/flutter"
@@ -66,17 +72,11 @@ RUN apt-get install -qq xz-utils zip libglu1-mesa && \
     curl -O https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz && \
     tar -xf flutter_linux_${FLUTTER_VERSION}-stable.tar.xz -C /usr/bin && \
     rm flutter_linux_${FLUTTER_VERSION}-stable.tar.xz && \
-    echo 'export PATH="/usr/bin/flutter/bin:$PATH"' >> ~/.bash_profile
+    echo 'export PATH="/usr/bin/flutter/bin:$PATH"' >> ~/.bash_profile && \
+    while true; do echo 'y'; sleep 2; done | flutter doctor --android-licenses
 
 # Jetbrains devcontainer dependencies
 #RUN apt-get install -qq procps
-
-# Development dependencties
-RUN apt-get install -qq git
-#    aspell
-
-# FIX: Git command returns fatal error: "detected dubious ownership"
-RUN git config --system --add safe.directory '*';
 
 # Update non-login terminal's path
 RUN echo "export PATH=$PATH:/etc/profile" >> ~/.bashrc
@@ -94,3 +94,4 @@ ENTRYPOINT \
     adb -a server && \
     # Keep the container up
     tail -f /dev/null
+
