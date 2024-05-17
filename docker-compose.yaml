@@ -34,8 +34,10 @@ services:
       # IDE install locations for VS Code and JetBrains IDEs
       - ide:/root/.cache/JetBrains
       - ide:/root/.vscode-server
+      - idePlugins:/root/.local/share/JetBrains
 
 volumes:
   android:
   git:
   ide:
+  idePlugins:
