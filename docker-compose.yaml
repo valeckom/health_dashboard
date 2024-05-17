@@ -22,7 +22,7 @@ services:
         ANDROID_COMMANDLINE_TOOLS: 10406996
 
     volumes:
-      - # Project folder
+      # Project folder
       - ./:/root/health_dashboard
 
       # ADB Keys
