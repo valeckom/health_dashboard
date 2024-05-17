@@ -22,10 +22,20 @@ services:
         ANDROID_COMMANDLINE_TOOLS: 10406996
 
     volumes:
+      - # Project folder
       - ./:/root/health_dashboard
-      - jetbrains:/root/.cache/JetBrains
-      - vscode:/root/.vscode-server
+
+      # ADB Keys
+      - android:/root/.android
+
+      # Git configuration
+      - git:/root/.config/git
+
+      # IDE install locations for VS Code and JetBrains IDEs
+      - ide:/root/.cache/JetBrains
+      - ide:/root/.vscode-server
 
 volumes:
-  jetbrains:
-  vscode:
+  android:
+  git:
+  ide:

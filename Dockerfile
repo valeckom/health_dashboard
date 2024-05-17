@@ -16,24 +16,41 @@ RUN apt-get install -qq \
     unzip \
     wget
 
-# GIT
-RUN apt-get install -qq git && \
-    # FIX: Git command returns fatal error: "detected dubious ownership"
-    git config --system --add safe.directory '*';
-
+################################################################################
 # SSH
+################################################################################
 RUN apt-get install -qq openssh-server && \
     sed -i 's/#PermitRootLogin prohibit-password/PermitRootLogin yes/' /etc/ssh/sshd_config && \
-    echo "root:0000" | chpasswd
+    echo "root:0000" | chpasswd && \
+    # Make the `.ssh` dir so we can write to it later.
+    mkdir /root/.ssh
 
+################################################################################
+# Git
+################################################################################
+RUN apt-get install -qq git && \
+    # Enable git completion
+    echo "source /usr/share/bash-completion/completions/git" >> ~/.bashrc && \
+    # Manually create the config file for Git.
+    # This file is able to be used in a volume unlike the default location.
+    mkdir -p ~/.config/git && \
+    touch ~/.config/git/config && \
+    # Fix: Git error: "detected dubious ownership"
+    git config --system --add safe.directory '*' && \
+    # Fix: The authenticity of host 'github.com (140.82.113.4)' can't be established.
+    ssh-keyscan github.com >> ~/.ssh/known_hosts
+
+################################################################################
 # JAVA
-# depedency of Android SDK
+################################################################################
 RUN apt-get -qq install openjdk-${JAVA_VERSION}-jdk-headless && \
     java -version
 
 ENV JAVA_HOME /usr/lib/jvm/java-${JAVA_VERSION}-openjdk-amd64
 
+################################################################################
 # Android SDK
+################################################################################
 # https://developer.android.com/studio/#downloads
 ENV ANDROID_SDK_URL="https://dl.google.com/android/repository/commandlinetools-linux-${ANDROID_COMMANDLINE_TOOLS}_latest.zip" \
     ANDROID_SDK_ROOT="/opt/android" \
@@ -58,12 +75,14 @@ RUN mkdir android && cd android && \
 RUN mkdir /root/.android && touch /root/.android/repositories.cfg && \
     while true; do echo 'y'; sleep 2; done | sdkmanager "platform-tools" "build-tools;$ANDROID_BUILD_TOOLS_VERSION" && \
     while true; do echo 'y'; sleep 2; done | sdkmanager "platforms;android-$ANDROID_SDK"
-    
+
 RUN chmod a+x -R $ANDROID_SDK_ROOT && \
     chown -R root:root $ANDROID_SDK_ROOT && \
     rm -rf /opt/android/licenses
 
+################################################################################
 # Flutter
+################################################################################
 ENV FLUTTER_HOME="/usr/bin/flutter"
 ENV PATH $PATH:$FLUTTER_HOME/bin
 
@@ -75,8 +94,9 @@ RUN apt-get install -qq xz-utils zip libglu1-mesa && \
     echo 'export PATH="/usr/bin/flutter/bin:$PATH"' >> ~/.bash_profile && \
     while true; do echo 'y'; sleep 2; done | flutter doctor --android-licenses
 
-# Jetbrains devcontainer dependencies
-#RUN apt-get install -qq procps
+################################################################################
+# Housekeeping
+################################################################################
 
 # Update non-login terminal's path
 RUN echo "export PATH=$PATH:/etc/profile" >> ~/.bashrc
